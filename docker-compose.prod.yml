@@ -3,7 +3,7 @@ services:
     image: ghcr.io/simstudioai/simstudio:latest
     restart: unless-stopped
     ports:
-      - '3000:3000'
+      - "3000:3000"
     deploy:
       resources:
         limits:
@@ -18,8 +18,9 @@ services:
       - COPILOT_API_KEY=${COPILOT_API_KEY}
       - SIM_AGENT_API_URL=${SIM_AGENT_API_URL}
       - OLLAMA_URL=${OLLAMA_URL:-http://localhost:11434}
-      - SOCKET_SERVER_URL=${SOCKET_SERVER_URL:-http://localhost:3002}
-      - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL:-http://localhost:3002}
+      # IMPORTANT: default to docker service name, not localhost
+      - SOCKET_SERVER_URL=${SOCKET_SERVER_URL:-http://realtime:3002}
+      - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL:-http://realtime:3002}
     depends_on:
       db:
         condition: service_healthy
@@ -28,17 +29,22 @@ services:
       realtime:
         condition: service_healthy
     healthcheck:
-      test: ['CMD', 'wget', '--spider', '--quiet', 'http://127.0.0.1:3000']
-      interval: 90s
+      test:
+        - CMD-SHELL
+        - >
+          node -e "http=require('http');
+          req=http.get('http://127.0.0.1:3000/',res=>process.exit(res.statusCode<500?0:1));
+          req.on('error',()=>process.exit(1));"
+      interval: 30s
       timeout: 5s
-      retries: 3
-      start_period: 10s
+      retries: 5
+      start_period: 30s
 
   realtime:
     image: ghcr.io/simstudioai/realtime:latest
     restart: unless-stopped
     ports:
-      - '3002:3002'
+      - "3002:3002"
     deploy:
       resources:
         limits:
@@ -56,12 +62,12 @@ services:
         - CMD-SHELL
         - >
           node -e "http=require('http');
-          req=http.get('http://127.0.0.1:3000/',res=>process.exit(res.statusCode<500?0:1));
+          req=http.get('http://127.0.0.1:3002/health',res=>process.exit(res.statusCode<500?0:1));
           req.on('error',()=>process.exit(1));"
-  interval: 30s
-  timeout: 5s
-  retries: 5
-  start_period: 30s
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   migrations:
     image: ghcr.io/simstudioai/migrations:latest
@@ -71,14 +77,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: ['bun', 'run', 'db:migrate']
-    restart: 'no'
+    command: ["bun", "run", "db:migrate"]
+    restart: "no"
 
   db:
     image: pgvector/pgvector:pg17
     restart: unless-stopped
     ports:
-      - '${POSTGRES_PORT:-5432}:5432'
+      - "${POSTGRES_PORT:-5432}:5432"
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
@@ -86,7 +92,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
