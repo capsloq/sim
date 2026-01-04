@@ -19,8 +19,8 @@ services:
       - SIM_AGENT_API_URL=${SIM_AGENT_API_URL}
       - OLLAMA_URL=${OLLAMA_URL:-http://localhost:11434}
       # IMPORTANT: default to docker service name, not localhost
-      - SOCKET_SERVER_URL=${SOCKET_SERVER_URL:-http://realtime:3002}
-      - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL:-http://realtime:3002}
+      - SOCKET_SERVER_URL=http://realtime:3002
+      - NEXT_PUBLIC_SOCKET_URL=https://sim.capsloq.de
     depends_on:
       db:
         condition: service_healthy
@@ -45,6 +45,13 @@ services:
     restart: unless-stopped
     ports:
       - "3002:3002"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.sim-realtime.rule=Host(`sim.capsloq.de`) && PathPrefix(`/socket.io`)
+      - traefik.http.routers.sim-realtime.entrypoints=https
+      - traefik.http.routers.sim-realtime.tls=true
+      - traefik.http.routers.sim-realtime.tls.certresolver=letsencrypt
+      - traefik.http.services.sim-realtime.loadbalancer.server.port=3002
     deploy:
       resources:
         limits:
