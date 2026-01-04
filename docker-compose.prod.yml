@@ -52,11 +52,16 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ['CMD', 'wget', '--spider', '--quiet', 'http://127.0.0.1:3002/health']
-      interval: 90s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
+      test:
+        - CMD-SHELL
+        - >
+          node -e "http=require('http');
+          req=http.get('http://127.0.0.1:3000/',res=>process.exit(res.statusCode<500?0:1));
+          req.on('error',()=>process.exit(1));"
+  interval: 30s
+  timeout: 5s
+  retries: 5
+  start_period: 30s
 
   migrations:
     image: ghcr.io/simstudioai/migrations:latest
