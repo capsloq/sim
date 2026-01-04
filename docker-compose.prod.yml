@@ -1,8 +1,8 @@
 services:
   simstudio:
     extra_hosts:
-      - "sim.capsloq.de:host-gateway"
-      - "realtime.sim.capsloq.de:host-gateway"
+      - "sim.capsloq.de:10.0.1.6"
+      - "realtime.sim.capsloq.de:10.0.1.6"
     image: ghcr.io/simstudioai/simstudio:latest
     restart: unless-stopped
     ports:
@@ -31,8 +31,8 @@ services:
 
   realtime:
     extra_hosts:
-      - "sim.capsloq.de:host-gateway"
-      - "realtime.sim.capsloq.de:host-gateway"
+      - "sim.capsloq.de:10.0.1.6"
+      - "realtime.sim.capsloq.de:10.0.1.6"
     image: ghcr.io/simstudioai/realtime:latest
     restart: unless-stopped
     ports:
