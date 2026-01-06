@@ -2,6 +2,9 @@ services:
   simstudio:
     image: ghcr.io/simstudioai/simstudio:latest
     restart: unless-stopped
+    extra_hosts:
+      - "sim.capsloq.de:10.0.1.1"
+      - "realtime.sim.capsloq.de:10.0.1.1"
     ports:
       - "3000:3000"
     environment:
@@ -29,6 +32,9 @@ services:
   realtime:
     image: ghcr.io/simstudioai/realtime:latest
     restart: unless-stopped
+    extra_hosts:
+      - "sim.capsloq.de:10.0.1.1"
+      - "realtime.sim.capsloq.de:10.0.1.1"
     ports:
       - "3002:3002"
     environment:
