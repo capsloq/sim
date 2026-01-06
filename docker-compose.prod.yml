@@ -1,9 +1,8 @@
 services:
   simstudio:
     extra_hosts:
-      - "host.docker.internal:host-gateway"
-      - "sim.capsloq.de:host-gateway"
-      - "realtime.sim.capsloq.de:host-gateway"
+      - "sim.capsloq.de:10.0.1.9"
+      - "realtime.sim.capsloq.de:10.0.1.9"
 
     image: ghcr.io/simstudioai/simstudio:latest
     restart: unless-stopped
@@ -33,9 +32,8 @@ services:
 
   realtime:
     extra_hosts:
-      - "host.docker.internal:host-gateway"
-      - "sim.capsloq.de:host-gateway"
-      - "realtime.sim.capsloq.de:host-gateway"
+      - "sim.capsloq.de:10.0.1.9"
+      - "realtime.sim.capsloq.de:10.0.1.9"
 
     image: ghcr.io/simstudioai/realtime:latest
     restart: unless-stopped
